@@ -3,6 +3,7 @@ package com.example.one_to_one_chat.service;
 import com.example.one_to_one_chat.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,9 +40,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/auth/welcome/**", "/auth/addNewUser/**", "/auth/generateToken/**").permitAll()
                 )
+
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/auth/user").hasRole("USER")
                                 .requestMatchers("/auth/admin").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/auth/delete").authenticated()
+
+
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

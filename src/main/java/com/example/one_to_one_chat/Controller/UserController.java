@@ -6,6 +6,7 @@ import com.example.one_to_one_chat.dto.CreateUserRequest;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.service.JwtService;
 import com.example.one_to_one_chat.service.UserService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -48,6 +49,14 @@ public class UserController {
         return service.createUser(user);
     }
 
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> delete(Authentication authentication)
+    {
+        service.deleteUser(authentication.getName());
+        return ResponseEntity.ok("Your account has been deleted successfully.");
+
+    }
 
 
 }
