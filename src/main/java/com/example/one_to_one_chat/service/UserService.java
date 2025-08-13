@@ -1,6 +1,7 @@
 package com.example.one_to_one_chat.service;
 
 import com.example.one_to_one_chat.dto.CreateUserRequest;
+import com.example.one_to_one_chat.exception.DuplicateUsernameException;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -16,11 +17,14 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
+    private final JwtService jwtService;
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(JwtService jwtService, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+
+        this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -29,6 +33,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Optional<User> user = userRepository.findByUsername(username);
+
 
         return user.orElseThrow(EntityNotFoundException::new);
     }
@@ -39,6 +44,13 @@ public class UserService implements UserDetailsService {
 
     public User createUser(CreateUserRequest request)
     {
+
+        if(userRepository.findByUsername(request.username()).isPresent())
+        {
+            throw new DuplicateUsernameException(request.username());
+
+         }
+
         User user = User.builder()
                 .name(request.name())
                 .username(request.username())
