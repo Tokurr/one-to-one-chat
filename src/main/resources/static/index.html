@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>One-to-One Chat Test UI</title>
+    <style>
+        :root { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji"; }
+        body { margin: 0; background: #0b1220; color: #e8eef9; }
+        .wrap { max-width: 960px; margin: 24px auto; padding: 16px; }
+        .card { background: #0f172a; border: 1px solid #1f2a44; border-radius: 12px; padding: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+        .grid { display: grid; gap: 12px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .row { display: flex; gap: 8px; align-items: center; }
+        label { font-size: 12px; color: #9fb0d8; }
+        input, textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #26314e; background: #0b1220; color: #e8eef9; outline: none; }
+        input:focus, textarea:focus { border-color: #3557ff; box-shadow: 0 0 0 3px rgba(53,87,255,.15); }
+        button { appearance: none; border: 1px solid #2a3a6b; background: #162347; color: #e8eef9; padding: 10px 14px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        button:hover { filter: brightness(1.05); }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+        .ok { color: #7cf59b; }
+        .err { color: #ff9b9b; }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 12px; }
+        .log { background: #0b1220; border: 1px dashed #2a3a6b; border-radius: 10px; padding: 12px; min-height: 160px; max-height: 280px; overflow: auto; }
+        .badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: #1e293b; border: 1px solid #2a3a6b; }
+    </style>
+    <!-- SockJS & STOMP (UMD) -->
+    <script src="https://unpkg.com/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://unpkg.com/stompjs@2.3.3/lib/stomp.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+    <h1>🔌 One-to-One Chat Test UI</h1>
+    <p class="mono">Handshake endpoint: <span class="badge">/ws</span> · App prefix: <span class="badge">/app</span> · User queue: <span class="badge">/user/queue/messages</span></p>
+
+    <div class="card grid">
+        <div class="grid grid-2">
+            <div>
+                <label>Server Base URL</label>
+                <input id="baseUrl" placeholder="http://localhost:8080" value="http://localhost:8080" />
+            </div>
+            <div>
+                <label>JWT (Bearer)</label>
+                <input id="jwt" placeholder="eyJhbGciOi..." />
+            </div>
+            <div>
+                <label>WS Endpoint</label>
+                <input id="wsPath" value="/ws" />
+            </div>
+            <div>
+                <label>Subscribe Destination</label>
+                <input id="subDest" value="/user/queue/messages" />
+            </div>
+        </div>
+        <div class="row">
+            <button id="btnConnect">Connect</button>
+            <button id="btnDisconnect" disabled>Disconnect</button>
+            <span id="status" class="mono"></span>
+        </div>
+    </div>
+
+    <div class="card grid" style="margin-top:16px;">
+        <div class="grid grid-2">
+            <div>
+                <label>Receiver Username</label>
+                <input id="toUser" placeholder="targetUsername" />
+            </div>
+            <div>
+                <label>Message</label>
+                <input id="msgText" placeholder="hello 👋" />
+            </div>
+        </div>
+        <div class="row">
+            <button id="btnSend" disabled>Send /app/direct.send</button>
+            <span class="mono">Payload → { receiverName, messageText }</span>
+        </div>
+    </div>
+
+    <div class="card grid" style="margin-top:16px;">
+        <label>Log</label>
+        <div id="log" class="log mono"></div>
+    </div>
+</div>
+
+<script>
+    (function(){
+        let stomp = null;
+        let sub = null;
+        const $ = id => document.getElementById(id);
+        const log = (msg, cls) => {
+            const el = document.createElement('div');
+            el.textContent = msg;
+            if (cls) el.className = cls;
+            $("log").prepend(el);
+        };
+        const setStatus = (txt, ok=false) => {
+            const el = $("status");
+            el.textContent = txt;
+            el.className = ok ? 'ok' : 'err';
+        };
+
+        function connect(){
+            const base = $("baseUrl").value.replace(/\/$/, '');
+            const wsPath = $("wsPath").value || '/ws';
+            const url = base + wsPath; // SockJS will call POST {base}{wsPath}/info
+
+            const token = $("jwt").value.trim();
+            if (!token) { log('Missing JWT token', 'err'); return; }
+
+            const sock = new SockJS(url);
+            stomp = Stomp.over(sock);
+            stomp.debug = () => {}; // silence
+
+            stomp.connect({ Authorization: 'Bearer ' + token }, () => {
+                $("btnConnect").disabled = true;
+                $("btnDisconnect").disabled = false;
+                $("btnSend").disabled = false;
+                setStatus('CONNECTED', true);
+                log('Connected via STOMP', 'ok');
+
+                const dest = $("subDest").value || '/user/queue/messages';
+                sub = stomp.subscribe(dest, frame => {
+                    try {
+                        const body = JSON.parse(frame.body);
+                        log('[IN] ' + JSON.stringify(body), 'ok');
+                    } catch(e){
+                        log('[IN-RAW] ' + frame.body, 'ok');
+                    }
+                });
+            }, (error) => {
+                setStatus('DISCONNECTED', false);
+                log('STOMP ERROR: ' + (error?.headers?.message || error), 'err');
+                $("btnConnect").disabled = false;
+                $("btnDisconnect").disabled = true;
+                $("btnSend").disabled = true;
+            });
+        }
+
+        function disconnect(){
+            if (sub) { try { sub.unsubscribe(); } catch(e){}; sub = null; }
+            if (stomp && stomp.connected) stomp.disconnect(() => {
+                log('Disconnected', 'err');
+            });
+            $("btnConnect").disabled = false;
+            $("btnDisconnect").disabled = true;
+            $("btnSend").disabled = true;
+            setStatus('DISCONNECTED');
+        }
+
+        function send(){
+            if (!stomp || !stomp.connected) { log('Not connected', 'err'); return; }
+            const to = $("toUser").value.trim();
+            const text = $("msgText").value.trim();
+            if (!to || !text) { log('receiverName and messageText are required', 'err'); return; }
+
+            const payload = { receiverName: to, messageText: text };
+            stomp.send('/app/direct.send', {}, JSON.stringify(payload));
+            log('[OUT] ' + JSON.stringify(payload));
+        }
+
+        $("btnConnect").addEventListener('click', connect);
+        $("btnDisconnect").addEventListener('click', disconnect);
+        $("btnSend").addEventListener('click', send);
+    })();
+</script>
+</body>
+</html>
