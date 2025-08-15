@@ -1,8 +1,6 @@
 package com.example.one_to_one_chat.service;
 
-
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -59,7 +57,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(userName)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*30))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000*60*60*24))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
 

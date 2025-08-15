@@ -37,6 +37,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ReceiverNameNotFoundException.class)
+    public ResponseEntity<String> handleReceiverName(ReceiverNameNotFoundException ex)
+    {
+        return new ResponseEntity<>(ex.getMessage(),HttpStatus.BAD_REQUEST);
+    }
 
 
 

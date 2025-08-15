@@ -5,6 +5,10 @@ import com.example.one_to_one_chat.exception.DuplicateUsernameException;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -81,5 +85,11 @@ public class UserService implements UserDetailsService {
     }
 
 
+    public Page<User> getUsers(int page,int size)
+    {
+
+        Pageable pageable = PageRequest.of(page,size,Sort.by("username"));
+        return userRepository.findAll(pageable);
+    }
 
 }

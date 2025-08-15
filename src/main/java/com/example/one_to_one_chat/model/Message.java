@@ -3,6 +3,8 @@ package com.example.one_to_one_chat.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @Table(name = "message")
@@ -14,6 +16,7 @@ public class Message {
     String receiverName;
     String senderName;
     String messageText;
+    LocalDateTime localDateTime;
 
 
 }

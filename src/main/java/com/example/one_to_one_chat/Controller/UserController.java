@@ -8,6 +8,10 @@ import com.example.one_to_one_chat.service.AuthenticationService;
 import com.example.one_to_one_chat.service.JwtService;
 import com.example.one_to_one_chat.service.UserService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -49,6 +53,14 @@ public class UserController {
     {
         service.deleteUser(authentication.getName());
         return ResponseEntity.ok("Your account has been deleted successfully.");
+
+    }
+
+    @GetMapping("/getUsers")
+    public ResponseEntity<Page<User>> getUsers( @RequestParam(defaultValue = "0") @Min(0) int page,
+                                                @RequestParam(defaultValue = "10") @Min(1)  int size)
+    {
+      return ResponseEntity.ok(service.getUsers(page, size));
 
     }
 
