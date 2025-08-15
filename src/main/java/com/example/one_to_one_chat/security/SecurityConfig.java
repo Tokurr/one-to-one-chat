@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.DELETE, "/auth/delete").authenticated()
                                 .requestMatchers("/message/getPageable").authenticated()
                                 .requestMatchers("/auth/getUsers").authenticated()
+                                .anyRequest().authenticated()
 
 
                 )

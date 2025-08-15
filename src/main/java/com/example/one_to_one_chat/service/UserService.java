@@ -92,4 +92,12 @@ public class UserService implements UserDetailsService {
         return userRepository.findAll(pageable);
     }
 
+    public Page<User> searchUser(String username, int page,int size)
+    {
+        Pageable pageable = PageRequest.of(page,size,Sort.by("username"));
+        return userRepository.findByUsernameContainingIgnoreCase(username,pageable);
+
+    }
+
+
 }

@@ -3,6 +3,7 @@ package com.example.one_to_one_chat.Controller;
 
 import com.example.one_to_one_chat.dto.AuthRequest;
 import com.example.one_to_one_chat.dto.CreateUserRequest;
+import com.example.one_to_one_chat.dto.SearchUserRequest;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.service.AuthenticationService;
 import com.example.one_to_one_chat.service.JwtService;
@@ -61,7 +62,12 @@ public class UserController {
                                                 @RequestParam(defaultValue = "10") @Min(1)  int size)
     {
       return ResponseEntity.ok(service.getUsers(page, size));
+    }
 
+
+    @GetMapping("/searchUsers")
+    public ResponseEntity<Page<User>> searchUsers(@Valid @ModelAttribute SearchUserRequest request){
+        return ResponseEntity.ok(service.searchUser(request.getUsername(),request.getPage(),request.getSize()));
     }
 
 

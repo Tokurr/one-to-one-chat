@@ -1,6 +1,7 @@
 package com.example.one_to_one_chat.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class User implements UserDetails {
     private Long id;
     private String name;
     @Column(unique = true, nullable = false)
+    @Size(min = 3, max = 90 , message = "username must be 3-90 chars")
     private String username;
     private String password;
 
