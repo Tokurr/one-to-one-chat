@@ -17,5 +17,10 @@ public interface MessageRepository extends JpaRepository<Message,Integer> {
 
     );
 
+    Page<Message> findBySenderNameAndReceiverNameAndMessageTextContainingIgnoreCaseOrSenderNameAndReceiverNameAndMessageTextContainingIgnoreCase(
+            String sender1, String receiver1, String keyword1,
+            String sender2, String receiver2, String keyword2,
+            Pageable pageable
+    );
 
 }

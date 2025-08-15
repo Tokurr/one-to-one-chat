@@ -3,13 +3,15 @@ package com.example.one_to_one_chat.Controller;
 import com.example.one_to_one_chat.dto.MessagePageableRequest;
 import com.example.one_to_one_chat.dto.MessageRequest;
 import com.example.one_to_one_chat.dto.MessageResponse;
+import com.example.one_to_one_chat.dto.MessageSearchRequest;
 import com.example.one_to_one_chat.model.Message;
 import com.example.one_to_one_chat.service.MessageService;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -42,14 +44,19 @@ public class ChatController {
 
 
     @GetMapping("/getPageable")
-    public Page<Message> getPageable(
+    public ResponseEntity< Page<Message> >getPageable(
             @Valid @ModelAttribute MessagePageableRequest request,
             Principal principal) {
 
-        return messageService.getMessages(principal.getName(),
-                request.getReceiverName(),
-                request.getPage(),
-                request.getSize());
+        return ResponseEntity.ok(messageService.getMessages(principal.getName(),request)) ;
     }
+
+    @GetMapping("/searchMessage")
+    public ResponseEntity<Page<Message>> searchMessage(@Valid @ModelAttribute MessageSearchRequest request, Principal principal)
+    {
+       return   ResponseEntity.ok(messageService.searchMessage(request,principal.getName()));
+
+    }
+
 
 }
