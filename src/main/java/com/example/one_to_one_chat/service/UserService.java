@@ -21,14 +21,13 @@ import java.util.Optional;
 @Service
 public class UserService implements UserDetailsService {
 
-    private final JwtService jwtService;
+
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(JwtService jwtService, UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
 
-        this.jwtService = jwtService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -37,8 +36,6 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 
         Optional<User> user = userRepository.findByUsername(username);
-
-
         return user.orElseThrow(EntityNotFoundException::new);
     }
 

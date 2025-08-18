@@ -1,11 +1,14 @@
 package com.example.one_to_one_chat.dto;
 
 import com.example.one_to_one_chat.model.Role;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.NoArgsConstructor;
+
 import java.util.Set;
 
 @Builder
