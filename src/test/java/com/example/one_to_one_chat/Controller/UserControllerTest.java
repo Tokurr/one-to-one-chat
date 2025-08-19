@@ -1,7 +1,6 @@
 package com.example.one_to_one_chat.Controller;
 
-import ch.qos.logback.core.encoder.EchoEncoder;
-import com.example.one_to_one_chat.dto.AuthRequest;
+
 import com.example.one_to_one_chat.dto.SearchUserRequest;
 import com.example.one_to_one_chat.model.Role;
 import com.example.one_to_one_chat.model.User;
