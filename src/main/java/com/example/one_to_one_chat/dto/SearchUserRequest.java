@@ -3,9 +3,13 @@ package com.example.one_to_one_chat.dto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class SearchUserRequest {
 
     @Size(min = 3, max = 90 , message = "username must be 3-90 chars")
