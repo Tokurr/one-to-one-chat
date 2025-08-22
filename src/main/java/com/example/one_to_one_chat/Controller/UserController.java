@@ -17,6 +17,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -58,12 +60,15 @@ public class UserController {
     }
 
     @GetMapping("/getUsers")
-    public ResponseEntity<Page<User>> getUsers( @RequestParam(defaultValue = "0") @Min(0) int page,
-                                                @RequestParam(defaultValue = "10") @Min(1)  int size)
+    public ResponseEntity<Page<User>> getUsers( @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1)  int size)
     {
       return ResponseEntity.ok(service.getUsers(page, size));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<User>> getAllUsers() {
+        return ResponseEntity.ok(service.getAllUsers());
+    }
 
     @GetMapping("/searchUsers")
     public ResponseEntity<Page<User>> searchUsers(@Valid @ModelAttribute SearchUserRequest request){

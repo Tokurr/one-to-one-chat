@@ -5,6 +5,8 @@ import com.example.one_to_one_chat.exception.DuplicateUsernameException;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +17,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -42,6 +45,7 @@ public class UserService implements UserDetailsService {
     public Optional<User> getByUserName(String username){
         return userRepository.findByUsername(username);
     }
+    @CacheEvict(cacheNames = "users", key = "'allUsers'")
 
     public User createUser(CreateUserRequest request)
     {
@@ -65,6 +69,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
 
     }
+    @CacheEvict(cacheNames = "users", key = "'allUsers'")
 
     public void deleteUser(String username)
     {
@@ -81,10 +86,12 @@ public class UserService implements UserDetailsService {
         }
     }
 
-
+    @Cacheable(cacheNames = "users", key = "'allUsers'")
+    public List<User> getAllUsers() {
+        return userRepository.findAll(Sort.by("username"));
+    }
     public Page<User> getUsers(int page,int size)
     {
-
         Pageable pageable = PageRequest.of(page,size,Sort.by("username"));
         return userRepository.findAll(pageable);
     }
