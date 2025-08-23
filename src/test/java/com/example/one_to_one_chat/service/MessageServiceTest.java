@@ -2,10 +2,12 @@ package com.example.one_to_one_chat.service;
 import com.example.one_to_one_chat.dto.MessagePageableRequest;
 import com.example.one_to_one_chat.dto.MessageRequest;
 import com.example.one_to_one_chat.dto.MessageSearchRequest;
+import com.example.one_to_one_chat.dto.UserDto;
 import com.example.one_to_one_chat.exception.ReceiverNameNotFoundException;
 import com.example.one_to_one_chat.model.Message;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.repository.MessageRepository;
+import org.apache.catalina.UserDatabase;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.data.domain.*;
@@ -50,7 +52,7 @@ class MessageServiceTest {
         String senderName = "kullanıcı1";
         MessagePageableRequest request = new MessagePageableRequest("kullanıcı2",0,3);
 
-        User receiverUser = new User();
+        UserDto receiverUser = new UserDto();
         receiverUser.setUsername("kullanıcı2");
         Message message = new Message(1,"kullanıcı2","kullanıcı1","Hello", LocalDateTime.now());
         List<Message> messageList = List.of(message);

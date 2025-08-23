@@ -4,6 +4,7 @@ package com.example.one_to_one_chat.Controller;
 import com.example.one_to_one_chat.dto.AuthRequest;
 import com.example.one_to_one_chat.dto.CreateUserRequest;
 import com.example.one_to_one_chat.dto.SearchUserRequest;
+import com.example.one_to_one_chat.dto.UserDto;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.service.AuthenticationService;
 import com.example.one_to_one_chat.service.JwtService;
@@ -45,7 +46,7 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    public User addUser( @Valid @RequestBody CreateUserRequest user)
+    public UserDto addUser(@Valid @RequestBody CreateUserRequest user)
     {
         return service.createUser(user);
     }
@@ -60,18 +61,18 @@ public class UserController {
     }
 
     @GetMapping("/getUsers")
-    public ResponseEntity<Page<User>> getUsers( @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1)  int size)
+    public ResponseEntity<Page<UserDto>> getUsers( @RequestParam(defaultValue = "0") @Min(0) int page, @RequestParam(defaultValue = "10") @Min(1)  int size)
     {
       return ResponseEntity.ok(service.getUsers(page, size));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
+    public ResponseEntity<List<UserDto>> getAllUsers() {
         return ResponseEntity.ok(service.getAllUsers());
     }
 
     @GetMapping("/searchUsers")
-    public ResponseEntity<Page<User>> searchUsers(@Valid @ModelAttribute SearchUserRequest request){
+    public ResponseEntity<Page<UserDto>> searchUsers(@Valid @ModelAttribute SearchUserRequest request){
         return ResponseEntity.ok(service.searchUser(request.getUsername(),request.getPage(),request.getSize()));
     }
 

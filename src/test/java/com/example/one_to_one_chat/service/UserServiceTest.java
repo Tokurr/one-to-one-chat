@@ -1,6 +1,7 @@
 package com.example.one_to_one_chat.service;
 
 import com.example.one_to_one_chat.dto.CreateUserRequest;
+import com.example.one_to_one_chat.dto.UserDto;
 import com.example.one_to_one_chat.exception.DuplicateUsernameException;
 import com.example.one_to_one_chat.model.Role;
 import com.example.one_to_one_chat.model.User;
@@ -62,7 +63,7 @@ class UserServiceTest {
         User user = returnUser();
 
         Mockito.when(userRepository.findByUsername(username)).thenReturn(Optional.of(user));
-        Optional<User> expectedUser = userService.getByUserName(username);
+        Optional<UserDto> expectedUser = userService.getByUserName(username);
         Assertions.assertEquals(expectedUser, Optional.of(user));
 
         Mockito.verify(userRepository).findByUsername(username);
@@ -94,7 +95,7 @@ class UserServiceTest {
         User savedUser = returnUser();
         Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(savedUser);
 
-        User user = userService.createUser(request);
+        UserDto user = userService.createUser(request);
 
         Assertions.assertEquals(user,savedUser);
 
@@ -189,7 +190,7 @@ class UserServiceTest {
 
 
         Mockito.when(userRepository.findByUsernameContainingIgnoreCase(username,pageable)).thenReturn(expectedUsers);
-        Page<User> result =  userService.searchUser(username,page,size);
+        Page<UserDto> result =  userService.searchUser(username,page,size);
         Assertions.assertEquals(expectedUsers,result);
         Mockito.verify(userRepository).findByUsernameContainingIgnoreCase(username,pageable);
 

@@ -1,6 +1,8 @@
 package com.example.one_to_one_chat.service;
 
+import com.example.one_to_one_chat.Mapper.Mapper;
 import com.example.one_to_one_chat.dto.CreateUserRequest;
+import com.example.one_to_one_chat.dto.UserDto;
 import com.example.one_to_one_chat.exception.DuplicateUsernameException;
 import com.example.one_to_one_chat.model.User;
 import com.example.one_to_one_chat.repository.UserRepository;
@@ -29,6 +31,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
+    Mapper mapper = new Mapper();
     public UserService(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
@@ -42,12 +45,14 @@ public class UserService implements UserDetailsService {
         return user.orElseThrow(EntityNotFoundException::new);
     }
 
-    public Optional<User> getByUserName(String username){
-        return userRepository.findByUsername(username);
+    public Optional<UserDto> getByUserName(String username){
+         UserDto  userDto = mapper.userToUserDto(userRepository.findByUsername(username).get());
+
+        return Optional.ofNullable(userDto);
     }
     @CacheEvict(cacheNames = "users", key = "'allUsers'")
 
-    public User createUser(CreateUserRequest request)
+    public UserDto createUser(CreateUserRequest request)
     {
 
         if(userRepository.findByUsername(request.username()).isPresent())
@@ -66,7 +71,12 @@ public class UserService implements UserDetailsService {
                 .isEnabled(true)
                 .accountNonLocked(true)
                 .build();
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+
+        UserDto dtoUser = mapper.userToUserDto(savedUser);
+
+        return dtoUser;
 
     }
     @CacheEvict(cacheNames = "users", key = "'allUsers'")
@@ -87,21 +97,26 @@ public class UserService implements UserDetailsService {
     }
 
     @Cacheable(cacheNames = "users", key = "'allUsers'")
-    public List<User> getAllUsers() {
-        return userRepository.findAll(Sort.by("username"));
-    }
-    public Page<User> getUsers(int page,int size)
-    {
-        Pageable pageable = PageRequest.of(page,size,Sort.by("username"));
-        return userRepository.findAll(pageable);
+    public List<UserDto> getAllUsers() {
+        List<User> userList = userRepository.findAll(Sort.by("username"));
+
+        return userList.stream()
+                .map(mapper::userToUserDto)
+                .toList();
     }
 
-    public Page<User> searchUser(String username, int page,int size)
-    {
-        Pageable pageable = PageRequest.of(page,size,Sort.by("username"));
-        return userRepository.findByUsernameContainingIgnoreCase(username,pageable);
-
+    public Page<UserDto> getUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("username"));
+        return userRepository.findAll(pageable)
+                .map(mapper::userToUserDto); // User → UserDto
     }
+
+    public Page<UserDto> searchUser(String username, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("username"));
+        return userRepository.findByUsernameContainingIgnoreCase(username, pageable)
+                .map(mapper::userToUserDto); // User → UserDto
+    }
+
 
 
 }
